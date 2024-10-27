@@ -20,3 +20,5 @@ class PlateEvent(models.Model):
 
     def __str__(self):
         return self.plate_number
+    
+

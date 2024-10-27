@@ -136,8 +136,8 @@
         <select name="camera">
             <option value="">Select a camera</option>
             {% for camera in cameras %}
-                <option value="{{ camera.id }}" {% if request.GET.camera == camera.id|stringformat:"s" %}selected{% endif %}>
-                    {{ camera.name }}
+                <option value="{{ camera.0 }}" {% if request.GET.camera == camera.0|stringformat:"s" %}selected{% endif %}>
+                    {{ camera.1 }}
                 </option>
             {% endfor %}
         </select>
@@ -148,7 +148,7 @@
         <button type="submit">Search</button>
     </form>
 
-    {% if results %}
+    {% comment %} {% if results %}
         <table>
             <thead>
                 <tr>
@@ -173,6 +173,39 @@
                     <td>{{ event.camera.latitude }}</td>
                     <td>{{ event.camera.longitude }}</td>
                     <td>{{ event.recognition_time }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% elif request.GET %}
+        <p class="no-results">No results found</p>
+    {% endif %} {% endcomment %}
+
+    {% if results %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Plate Number</th>
+                    <th>Brand</th>
+                    <th>Color</th>
+                    <th>Camera</th>
+                    <th>IP Address</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Recognition Time</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for event in results %}
+                <tr>
+                    <td>{{ event.0 }}</td> <!-- plate_number -->
+                    <td>{{ event.1 }}</td> <!-- brand -->
+                    <td>{{ event.2 }}</td> <!-- color -->
+                    <td>{{ event.3 }}</td> <!-- camera name -->
+                    <td>{{ event.4 }}</td> <!-- ip_address -->
+                    <td>{{ event.5 }}</td> <!-- latitude -->
+                    <td>{{ event.6 }}</td> <!-- longitude -->
+                    <td>{{ event.7 }}</td> <!-- recognition_time -->
                 </tr>
             {% endfor %}
             </tbody>
