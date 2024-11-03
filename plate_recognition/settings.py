@@ -85,6 +85,10 @@ DATABASES = {
     }
 }
 
+MIGRATION_MODULES = {
+    'recognition': None,  # Укажите имя вашего приложения, где находятся модели
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

@@ -1,24 +1,20 @@
 from django.db import models
-from django.utils import timezone
 
 class Camera(models.Model):
     name = models.CharField(max_length=20)
-    ip_address = models.GenericIPAddressField()
-    added_date = models.DateTimeField(default=timezone.now)
-    latitude = models.FloatField()
-    longitude = models.FloatField()
+    ip_address = models.CharField(max_length=16)
+    latitude = models.DecimalField(max_digits=10, decimal_places=8)
+    longitude = models.DecimalField(max_digits=11, decimal_places=8)
 
-    def __str__(self):
-        return self.name
+    class Meta:
+        db_table = 'cameras'
 
 class PlateEvent(models.Model):
-    plate_number = models.CharField(max_length=10)
-    recognition_time = models.DateTimeField(default=timezone.now)
+    plate_number = models.CharField(max_length=8)
     brand = models.CharField(max_length=30)
     color = models.CharField(max_length=30)
     camera = models.ForeignKey(Camera, on_delete=models.CASCADE)
+    recognition_time = models.DateTimeField()
 
-    def __str__(self):
-        return self.plate_number
-    
-
+    class Meta:
+        db_table = 'plate_events'
