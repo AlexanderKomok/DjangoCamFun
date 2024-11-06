@@ -1,41 +1,58 @@
+import os
+from django.db import connection
 from django.shortcuts import render
-from django.utils.dateparse import parse_datetime
-from recognition.models import Camera, PlateEvent
+from django.conf import settings
+
+def load_sql_file(file_path):
+    with open(file_path, 'r') as file:
+        return file.read()
+
+def get_all_cameras():
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT id, name FROM cameras")
+        cameras = cursor.fetchall()
+    return cameras
 
 def search(request):
-    query = request.GET.get('query', '')
-    camera_id = request.GET.get('camera')
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
-    results = []
-    cameras = Camera.objects.all()
+    query = request.GET.get('query', None)
+    camera_id = request.GET.get('camera', None)
+    start_date = request.GET.get('start_date', None)
+    end_date = request.GET.get('end_date', None)
 
-    if start_date and end_date:
-        start_datetime = parse_datetime(f'{start_date} 00:00:00')
-        end_datetime = parse_datetime(f'{end_date} 23:59:59')
+    cameras = get_all_cameras()
 
-    if query and not camera_id and not (start_date and end_date):
-        results = PlateEvent.objects.filter(plate_number__icontains=query).select_related('camera')
+    if not query and not camera_id and not start_date and not end_date:
+        results = []
+    else:
+        sql_file_path = os.path.join(settings.BASE_DIR, 'recognition', 'queries', 'get_plate_events.sql')
 
-    elif camera_id and not query and not (start_date and end_date):
-        results = PlateEvent.objects.filter(camera_id=camera_id).select_related('camera')
+        sql_query = load_sql_file(sql_file_path)
 
-    elif query and start_date and end_date:
-        results = PlateEvent.objects.filter(
-            plate_number__icontains=query,
-            recognition_time__range=(start_datetime, end_datetime)
-        ).select_related('camera')
+        query_param = f'%{query}%' if query else None
+        camera_param = camera_id if camera_id else None
+        start_date_param = start_date if start_date else None
+        end_date_param = end_date if end_date else None
 
+        with connection.cursor() as cursor:
+            cursor.execute(sql_query, [
+                query_param, query_param,
+                camera_param, camera_param,
+                start_date_param, start_date_param,
+                end_date_param, end_date_param
+            ])
+            rows = cursor.fetchall()
 
-    elif camera_id and start_date and end_date:
-        results = PlateEvent.objects.filter(
-            camera_id=camera_id,
-            recognition_time__range=(start_datetime, end_datetime)
-        ).select_related('camera')
-
-    elif start_date and end_date and not query and not camera_id:
-        results = PlateEvent.objects.filter(
-            recognition_time__range=(start_datetime, end_datetime)
-        ).select_related('camera')
+        results = []
+        for row in rows:
+            results.append({
+                'plate_number': row[0],
+                'brand': row[1],
+                'color': row[2],
+                'recognition_time': row[3],
+                'camera_name': row[4],
+                'ip_address': row[5],
+                'latitude': row[6],
+                'longitude': row[7],
+            })
 
     return render(request, 'search.html', {'results': results, 'cameras': cameras})

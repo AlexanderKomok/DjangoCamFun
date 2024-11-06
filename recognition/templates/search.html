@@ -114,12 +114,12 @@
 
 <form method="GET">
     <input type="text" name="query" placeholder="Enter car plate number" value="{{ request.GET.query }}">
-    
+
     <select name="camera">
         <option value="">Select a camera</option>
         {% for camera in cameras %}
-            <option value="{{ camera.id }}" {% if request.GET.camera == camera.id|stringformat:"s" %}selected{% endif %}>
-                {{ camera.name }}
+            <option value="{{ camera.0 }}" {% if request.GET.camera == camera.0|stringformat:"s" %}selected{% endif %}>
+                {{ camera.1 }}
             </option>
         {% endfor %}
     </select>
@@ -127,40 +127,45 @@
     <input type="date" name="start_date" value="{{ request.GET.start_date }}">
     <input type="date" name="end_date" value="{{ request.GET.end_date }}">
 
+
     <button type="submit">Search</button>
 </form>
 
-{% if results %}
-    <table>
-        <thead>
-            <tr>
-                <th>Plate Number</th>
-                <th>Brand</th>
-                <th>Color</th>
-                <th>Camera</th>
-                <th>IP Address</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
-                <th>Recognition Time</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for event in results %}
-            <tr>
-                <td>{{ event.plate_number }}</td>
-                <td>{{ event.brand }}</td>
-                <td>{{ event.color }}</td>
-                <td>{{ event.camera.name }}</td>
-                <td>{{ event.camera.ip_address }}</td>
-                <td>{{ event.camera.latitude }}</td>
-                <td>{{ event.camera.longitude }}</td>
-                <td>{{ event.recognition_time }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-{% elif request.GET %}
-    <p class="no-results">No results found</p>
+{% if request.GET.query or request.GET.camera or request.GET.start_date or request.GET.end_date %}
+    <h2>Search Results</h2>
+
+    {% if results %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Plate Number</th>
+                    <th>Brand</th>
+                    <th>Color</th>
+                    <th>Camera Name</th>
+                    <th>IP Address</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Recognition Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                    <tr>
+                        <td>{{ result.plate_number }}</td>
+                        <td>{{ result.brand }}</td>
+                        <td>{{ result.color }}</td>
+                        <td>{{ result.camera_name }}</td>
+                        <td>{{ result.ip_address }}</td>
+                        <td>{{ result.latitude }}</td>
+                        <td>{{ result.longitude }}</td>
+                        <td>{{ result.recognition_time }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No results found.</p>
+    {% endif %}
 {% endif %}
 
 </body>

@@ -86,7 +86,7 @@ DATABASES = {
 }
 
 MIGRATION_MODULES = {
-    'recognition': None,  # Укажите имя вашего приложения, где находятся модели
+    'recognition': None,
 }
 
 
